@@ -62,15 +62,15 @@ var ad;
         collections.stringSetToStringArray = stringSetToStringArray;
     })(collections = ad.collections || (ad.collections = {}));
     var resources;
-    (function (resources_1) {
+    (function (_resources) {
         function getDrawableId(name) {
             return getId(":drawable/" + name);
         }
-        resources_1.getDrawableId = getDrawableId;
+        _resources.getDrawableId = getDrawableId;
         function getStringId(name) {
             return getId(":string/" + name);
         }
-        resources_1.getStringId = getStringId;
+        _resources.getStringId = getStringId;
         function getId(name) {
             var context = application.android.context;
             var resources = context.getResources();
@@ -78,7 +78,7 @@ var ad;
             var uri = packageName + name;
             return resources.getIdentifier(uri, null, null);
         }
-        resources_1.getId = getId;
+        _resources.getId = getId;
     })(resources = ad.resources || (ad.resources = {}));
 })(ad = exports.ad || (exports.ad = {}));
 function GC() {

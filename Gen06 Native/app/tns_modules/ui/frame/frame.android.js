@@ -10,12 +10,12 @@ var observable = require("data/observable");
 var utils = require("utils/utils");
 var view = require("ui/core/view");
 var application = require("application");
+var enums = require("ui/enums");
 require("utils/module-merge").merge(frameCommon, exports);
 var TAG = "_fragmentTag";
 var OWNER = "_owner";
 var HIDDEN = "_hidden";
 var INTENT_EXTRA = "com.tns.activity";
-var ANDROID_FRAME = "android_frame";
 var navDepth = 0;
 var PageFragmentBody = (function (_super) {
     __extends(PageFragmentBody, _super);
@@ -106,12 +106,39 @@ var PageFragmentBody = (function (_super) {
     PageFragmentBody.prototype.onCreateOptionsMenu = function (menu, inflater) {
         _super.prototype.onCreateOptionsMenu.call(this, menu, inflater);
         var page = this.entry.resolvedPage;
-        page.actionBar._updateAndroid(menu);
+        var items = page.optionsMenu.getItems();
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var menuItem = menu.add(android.view.Menu.NONE, i, android.view.Menu.NONE, item.text);
+            if (item.icon) {
+                var androidApp = application.android;
+                var res = androidApp.context.getResources();
+                var id = res.getIdentifier(item.icon, 'drawable', androidApp.packageName);
+                if (id) {
+                    menuItem.setIcon(id);
+                }
+            }
+            var showAsAction = PageFragmentBody.getShowAsAction(item);
+            menuItem.setShowAsAction(showAsAction);
+        }
+    };
+    PageFragmentBody.getShowAsAction = function (menuItem) {
+        switch (menuItem.android.position) {
+            case enums.MenuItemPosition.actionBarIfRoom:
+                return android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+            case enums.MenuItemPosition.popup:
+                return android.view.MenuItem.SHOW_AS_ACTION_NEVER;
+            case enums.MenuItemPosition.actionBar:
+            default:
+                return android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;
+        }
     };
     PageFragmentBody.prototype.onOptionsItemSelected = function (item) {
         var page = this.entry.resolvedPage;
         var itemId = item.getItemId();
-        if (page.actionBar._onAndroidItemSelected(itemId)) {
+        var menuItem = page.optionsMenu.getItemAt(itemId);
+        if (menuItem) {
+            menuItem._raiseTap();
             return true;
         }
         return _super.prototype.onOptionsItemSelected.call(this, item);
@@ -124,7 +151,7 @@ function onFragmentShown(fragment) {
     var page = entry.resolvedPage;
     frame._currentEntry = entry;
     frame._addView(page);
-    page.onNavigatedTo();
+    page.onNavigatedTo(entry.entry.context);
     frame._processNavigationQueue(page);
 }
 function onFragmentHidden(fragment) {
@@ -266,33 +293,43 @@ var Frame = (function (_super) {
     };
     Frame.prototype._clearAndroidReference = function () {
     };
+    Frame.prototype._invalidateOptionsMenu = function () {
+        if (this.android && this.android.activity) {
+            this.android.activity.invalidateOptionsMenu();
+        }
+    };
     return Frame;
 })(frameCommon.Frame);
 exports.Frame = Frame;
-var NativeActivity = {
-    get frame() {
-        if (this.androidFrame) {
-            return this.androidFrame.owner;
-        }
-        return null;
-    },
-    get androidFrame() {
-        return this[ANDROID_FRAME];
-    },
-    onCreate: function (savedInstanceState) {
+var NativeActivity = (function (_super) {
+    __extends(NativeActivity, _super);
+    function NativeActivity() {
+        _super.apply(this, arguments);
+    }
+    Object.defineProperty(NativeActivity.prototype, "frame", {
+        get: function () {
+            if (this.androidFrame) {
+                return this.androidFrame.owner;
+            }
+            return null;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    NativeActivity.prototype.onCreate = function (savedInstanceState) {
         trace.write("NativeScriptActivity.onCreate(); savedInstanceState: " + savedInstanceState, trace.categories.NativeLifecycle);
         var frameId = this.getIntent().getExtras().getInt(INTENT_EXTRA);
         for (var i = 0; i < framesCache.length; i++) {
             var aliveFrame = framesCache[i].get();
             if (aliveFrame && aliveFrame.frameId === frameId) {
-                this[ANDROID_FRAME] = aliveFrame;
+                this.androidFrame = aliveFrame;
                 break;
             }
         }
         if (!this.androidFrame) {
             throw new Error("Could not find AndroidFrame for Activity");
         }
-        this.super.onCreate(savedInstanceState);
+        _super.prototype.onCreate.call(this, savedInstanceState);
         this.androidFrame.setActivity(this);
         var root = new view.NativeViewGroup(this);
         root[OWNER] = this.frame;
@@ -301,51 +338,43 @@ var NativeActivity = {
         this.setContentView(this.androidFrame.rootViewGroup);
         var isRestart = !!savedInstanceState;
         this.frame._onActivityCreated(isRestart);
-    },
-    onActivityResult: function (requestCode, resultCode, data) {
-        this.super.onActivityResult(requestCode, resultCode, data);
+    };
+    NativeActivity.prototype.onActivityResult = function (requestCode, resultCode, data) {
+        _super.prototype.onActivityResult.call(this, requestCode, resultCode, data);
         trace.write("NativeScriptActivity.onActivityResult();", trace.categories.NativeLifecycle);
         var result = application.android.onActivityResult;
         if (result) {
             result(requestCode, resultCode, data);
         }
-        application.android.notify({
-            eventName: "activityResult",
-            object: application.android,
-            activity: this,
-            requestCode: requestCode,
-            resultCode: resultCode,
-            intent: data
-        });
-    },
-    onAttachFragment: function (fragment) {
+    };
+    NativeActivity.prototype.onAttachFragment = function (fragment) {
         trace.write("NativeScriptActivity.onAttachFragment() : " + fragment.getTag(), trace.categories.NativeLifecycle);
-        this.super.onAttachFragment(fragment);
+        _super.prototype.onAttachFragment.call(this, fragment);
         if (!fragment.entry) {
             findPageForFragment(fragment, this.frame);
         }
-    },
-    onStart: function () {
-        this.super.onStart();
+    };
+    NativeActivity.prototype.onStart = function () {
+        _super.prototype.onStart.call(this);
         trace.write("NativeScriptActivity.onStart();", trace.categories.NativeLifecycle);
         this.frame.onLoaded();
-    },
-    onStop: function () {
-        this.super.onStop();
+    };
+    NativeActivity.prototype.onStop = function () {
+        _super.prototype.onStop.call(this);
         trace.write("NativeScriptActivity.onStop();", trace.categories.NativeLifecycle);
         this.frame.onUnloaded();
-    },
-    onDestroy: function () {
+    };
+    NativeActivity.prototype.onDestroy = function () {
         var frame = this.frame;
         frame._onDetached(true);
         for (var i = 0; i < frame.backStack.length; i++) {
             frame.backStack[i].resolvedPage._onDetached(true);
         }
         this.androidFrame.reset();
-        this.super.onDestroy();
+        _super.prototype.onDestroy.call(this);
         trace.write("NativeScriptActivity.onDestroy();", trace.categories.NativeLifecycle);
-    },
-    onOptionsItemSelected: function (menuItem) {
+    };
+    NativeActivity.prototype.onOptionsItemSelected = function (menuItem) {
         if (!this.androidFrame.hasListeners(frameCommon.Frame.androidOptionSelectedEvent)) {
             return false;
         }
@@ -357,35 +386,25 @@ var NativeActivity = {
         };
         this.androidFrame.notify(data);
         return data.handled;
-    },
-    onBackPressed: function () {
+    };
+    NativeActivity.prototype.onBackPressed = function () {
         trace.write("NativeScriptActivity.onBackPressed;", trace.categories.NativeLifecycle);
-        var args = {
-            eventName: "activityBackPressed",
-            object: application.android,
-            activity: this,
-            cancel: false,
-        };
-        application.android.notify(args);
-        if (args.cancel) {
-            return;
-        }
         if (!frameCommon.goBack()) {
-            this.super.onBackPressed();
+            _super.prototype.onBackPressed.call(this);
         }
-    },
-    onLowMemory: function () {
+    };
+    NativeActivity.prototype.onLowMemory = function () {
         gc();
         java.lang.System.gc();
-        this.super.onLowMemory();
-        application.notify({ eventName: application.lowMemoryEvent, object: this, android: this });
-    },
-    onTrimMemory: function (level) {
+        _super.prototype.onLowMemory.call(this);
+    };
+    NativeActivity.prototype.onTrimMemory = function (level) {
         gc();
         java.lang.System.gc();
-        this.super.onTrimMemory(level);
-    }
-};
+        _super.prototype.onTrimMemory.call(this, level);
+    };
+    return NativeActivity;
+})(com.tns.NativeScriptActivity);
 var framesCounter = 0;
 var framesCache = new Array();
 var AndroidFrame = (function (_super) {

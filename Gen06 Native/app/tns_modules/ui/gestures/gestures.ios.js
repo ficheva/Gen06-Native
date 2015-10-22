@@ -29,9 +29,9 @@ var UIGestureRecognizerImpl = (function (_super) {
         return this;
     };
     UIGestureRecognizerImpl.prototype.recognize = function (recognizer) {
-        var callback = this._callback ? this._callback : this._owner.callback;
+        var callback = this._callback ? this._callback : this._owner._callback;
         var type = this._type;
-        var target = this._owner.target;
+        var target = this._owner._target;
         var args = {
             type: type,
             view: target,
@@ -47,28 +47,29 @@ var UIGestureRecognizerImpl = (function (_super) {
     };
     return UIGestureRecognizerImpl;
 })(NSObject);
-var GesturesObserver = (function (_super) {
-    __extends(GesturesObserver, _super);
-    function GesturesObserver(target, callback, context) {
-        _super.call(this, target, callback, context);
+var GesturesObserver = (function () {
+    function GesturesObserver(callback) {
+        this._callback = callback;
         this._recognizers = {};
     }
-    GesturesObserver.prototype.observe = function (type) {
+    GesturesObserver.prototype.observe = function (target, type, thisArg) {
         var _this = this;
-        if (this.target) {
-            this.type = type;
+
+        if (target) {
+            this._target = target;
+            this._context = thisArg;
             this._onTargetLoaded = function (args) {
-                trace.write(_this.target + ".target loaded. _nativeView:" + _this.target._nativeView, "gestures");
-                _this._attach(_this.target, type);
+                trace.write(_this._target + ".target loaded. _nativeView:" + _this._target._nativeView, "gestures");
+                _this._attach(target, type);
             };
             this._onTargetUnloaded = function (args) {
-                trace.write(_this.target + ".target unloaded. _nativeView:" + _this.target._nativeView, "gestures");
+                trace.write(_this._target + ".target unloaded. _nativeView:" + _this._target._nativeView, "gestures");
                 _this._dettach();
             };
-            this.target.on(view.View.loadedEvent, this._onTargetLoaded);
-            this.target.on(view.View.unloadedEvent, this._onTargetUnloaded);
-            if (this.target.isLoaded) {
-                this._attach(this.target, type);
+            target.on(view.View.loadedEvent, this._onTargetLoaded);
+            target.on(view.View.unloadedEvent, this._onTargetUnloaded);
+            if (target.isLoaded) {
+                this._attach(target, type);
             }
         }
     };
@@ -121,12 +122,12 @@ var GesturesObserver = (function (_super) {
         }
     };
     GesturesObserver.prototype._dettach = function () {
-        trace.write(this.target + "._dettach() _nativeView:" + this.target._nativeView, "gestures");
-        if (this.target && this.target._nativeView) {
+        trace.write(this._target + "._dettach() _nativeView:" + this._target._nativeView, "gestures");
+        if (this._target && this._target._nativeView) {
             for (var name in this._recognizers) {
                 if (this._recognizers.hasOwnProperty(name)) {
                     var item = this._recognizers[name];
-                    this.target._nativeView.removeGestureRecognizer(item.recognizer);
+                    this._target._nativeView.removeGestureRecognizer(item.recognizer);
                     item.recognizer = null;
                     item.target = null;
                 }
@@ -136,23 +137,23 @@ var GesturesObserver = (function (_super) {
     };
     GesturesObserver.prototype.disconnect = function () {
         this._dettach();
-        if (this.target) {
-            this.target.off(view.View.loadedEvent, this._onTargetLoaded);
-            this.target.off(view.View.unloadedEvent, this._onTargetUnloaded);
+        if (this._target) {
+            this._target.off(view.View.loadedEvent, this._onTargetLoaded);
+            this._target.off(view.View.unloadedEvent, this._onTargetUnloaded);
             this._onTargetLoaded = null;
             this._onTargetUnloaded = null;
+            this._target = null;
         }
-        _super.prototype.disconnect.call(this);
     };
     GesturesObserver.prototype._executeCallback = function (args) {
-        if (this.callback) {
-            this.callback.call(this.context, args);
+        if (this._callback) {
+            this._callback.call(this._context, args);
         }
     };
     GesturesObserver.prototype._createRecognizer = function (type, callback, swipeDirection) {
         var recognizer;
         var name = definition.toString(type);
-        var target = _createUIGestureRecognizerTarget(this, type, callback, this.context);
+        var target = _createUIGestureRecognizerTarget(this, type, callback, this._context);
         var recognizerType = _getUIGestureRecognizerType(type);
         if (recognizerType) {
             if (type === definition.GestureTypes.swipe && swipeDirection) {
@@ -163,6 +164,7 @@ var GesturesObserver = (function (_super) {
             else {
                 recognizer = recognizerType.alloc().initWithTargetAction(target, "recognize");
             }
+
             if (recognizer) {
                 this._recognizers[name] = { recognizer: recognizer, target: target };
             }
@@ -170,7 +172,7 @@ var GesturesObserver = (function (_super) {
         return recognizer;
     };
     return GesturesObserver;
-})(common.GesturesObserver);
+})();
 exports.GesturesObserver = GesturesObserver;
 function _createUIGestureRecognizerTarget(owner, type, callback, thisArg) {
     return UIGestureRecognizerImpl.new().initWithOwnerTypeCallback(owner, type, callback, thisArg);

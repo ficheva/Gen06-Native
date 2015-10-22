@@ -1,11 +1,11 @@
 {
   "ProjectName": "Gen06 Native",
-  "ProjectGuid": "bdfdc381-679e-4d44-947d-f547d2bb9846",
+  "ProjectGuid": "03eeebd2-6865-4520-bb78-67dabf7d7b4a",
   "projectVersion": 1,
-  "AppIdentifier": "com.telerik.Gen06Native",
-  "DisplayName": "Gen06 Native",
+  "AppIdentifier": "com.telerik.gen06Native",
+  "DisplayName": "gen 06 Native",
   "Author": "",
-  "Description": "Gen06 Native",
+  "Description": "gen 06 Native",
   "BundleVersion": "1.0",
   "AndroidVersionCode": "1",
   "iOSDeviceFamily": [
@@ -23,6 +23,6 @@
   ],
   "AndroidHardwareAcceleration": "false",
   "iOSStatusBarStyle": "Default",
-  "FrameworkVersion": "1.2.3",
+  "FrameworkVersion": "1.0.1",
   "Framework": "NativeScript"
 }

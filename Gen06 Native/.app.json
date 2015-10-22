@@ -1,15 +1,142 @@
 {
   "type": "NativeScript",
-  "isNew": true,
+  "name": "nativeScriptApp",
+  "navigation": "none",
+  "views": [
+    {
+      "type": "view",
+      "name": "home",
+      "title": "Home",
+      "addToNavigation": true,
+      "icon": "home",
+      "components": []
+    },
+    {
+      "type": "view",
+      "name": "formView",
+      "title": "Form",
+      "addToNavigation": true,
+      "icon": "bookmarks",
+      "components": [
+        {
+          "type": "form",
+          "name": "formViewModel",
+          "components": [
+            {
+              "type": "field",
+              "name": "username",
+              "title": "Username",
+              "inputType": "text",
+              "placeholder": "johndoe"
+            },
+            {
+              "type": "field",
+              "name": "search",
+              "title": "Search",
+              "inputType": "search",
+              "placeholder": "Search"
+            },
+            {
+              "type": "field",
+              "name": "password",
+              "title": "Password",
+              "inputType": "password",
+              "placeholder": ""
+            },
+            {
+              "type": "field",
+              "name": "switch",
+              "title": "Switch",
+              "inputType": "switch",
+              "placeholder": "johndoe"
+            }
+          ],
+          "submitButton": "Confirm",
+          "cancelButton": "Cancel"
+        }
+      ]
+    },
+    {
+      "type": "view",
+      "name": "registerView",
+      "title": "Register",
+      "addToNavigation": true,
+      "icon": "edit",
+      "components": [
+        {
+          "type": "signup",
+          "name": "registerViewModel",
+          "dataProvider": "gen06Backend",
+          "emailLabel": "Email",
+          "usernameLabel": "Username",
+          "passwordLabel": "Password",
+          "registerLabel": "Register",
+          "registerRedirect": "home",
+          "navigateToSignin": true,
+          "emailPlaceholder": "",
+          "usernamePlaceholder": "",
+          "passwordPlaceholder": "",
+          "signinLabel": "Sign In",
+          "signin": "signInView"
+        }
+      ]
+    },
+    {
+      "type": "view",
+      "name": "dataListView",
+      "title": "Data List",
+      "addToNavigation": true,
+      "icon": "organize",
+      "components": [
+        {
+          "type": "list",
+          "name": "dataListViewModel",
+          "dataProvider": "gen06Backend",
+          "masterDetails": true,
+          "pullToRefresh": false,
+          "endlessScroll": false,
+          "collection": "Activities",
+          "headerField": "Text",
+          "detailHeaderField": "Text"
+        }
+      ]
+    },
+    {
+      "type": "view",
+      "name": "signInView",
+      "title": "Sign In",
+      "addToNavigation": true,
+      "icon": "contacts",
+      "components": [
+        {
+          "type": "signin",
+          "name": "signInViewModel",
+          "dataProvider": "gen06Backend",
+          "usernameLabel": "Username",
+          "passwordLabel": "Password",
+          "confirmLabel": "Sign In",
+          "signinRedirect": "home",
+          "navigateToSignup": true,
+          "usernamePlaceholder": "",
+          "passwordPlaceholder": "",
+          "registerLabel": "Register",
+          "signup": "registerView"
+        }
+      ]
+    }
+  ],
+  "view": "home",
+  "skin": "native",
+  "transition": "none",
   "dataProviders": [
     {
       "type": "dataProvider",
-      "title": "DefaultProvider",
-      "name": "defaultProvider",
+      "name": "gen06Backend",
+      "title": "gen 06 / gen 06 Backend",
       "source": "everlive",
-      "offlineStorage": false,
-      "everliveKey": "l2qJq1SKX7zbboEk",
-      "everliveUrl": ""
+      "everliveKey": "CAQkp9RyP3YDkM5w",
+      "everliveUrl": "//testtap.telerik.com/bs-api/v1/",
+      "offlineStorage": true
     }
   ]
 }

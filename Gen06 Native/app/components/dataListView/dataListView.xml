@@ -1,0 +1,35 @@
+<Page xmlns="http://www.nativescript.org/tns.xsd" xmlns:header="utils/action-bar" loaded="pageLoaded">
+
+    <GridLayout rows="auto, *">
+        <header:action-bar />
+        <StackLayout row="1">
+
+            <GridLayout rows="*">
+
+                <ListView items="{{ listItems }}" itemTap="onListViewItemTap">
+
+                    <ListView.itemTemplate>
+                        <GridLayout columns="*" cssClass="padded-label">
+                            <StackLayout height="50" />
+
+                            <StackLayout col="2" cssClass="padded-label-stack">
+                                <Label col="0" cssClass="title-label" textWrap="true">
+                                    <Label.formattedText>
+                                        <FormattedString>
+                                            <FormattedString.spans>
+                                                <Span text="{{ header }}" fontAttributes="Bold" />
+                                            </FormattedString.spans>
+                                        </FormattedString>
+                                    </Label.formattedText>
+                                </Label>
+                            </StackLayout>
+
+                        </GridLayout>
+                    </ListView.itemTemplate>
+                </ListView>
+            </GridLayout>
+
+            <!-- additional view content -->
+        </StackLayout>
+    </GridLayout>
+</Page>

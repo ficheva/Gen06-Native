@@ -1,6 +1,3 @@
-/**
- * Android specific http request implementation.
- */
 var imageSource = require("image-source");
 var types = require("utils/types");
 var platform = require("platform");
@@ -32,8 +29,12 @@ function onRequestComplete(requestId, result) {
     callbacks.resolveCallback({
         content: {
             raw: result.raw,
-            toString: function () { return result.responseAsString; },
-            toJSON: function () { return JSON.parse(result.responseAsString); },
+            toString: function () {
+                return result.responseAsString;
+            },
+            toJSON: function () {
+                return JSON.parse(result.responseAsString);
+            },
             toImage: function () {
                 return new Promise(function (resolveImage, rejectImage) {
                     if (result.responseAsImage != null) {

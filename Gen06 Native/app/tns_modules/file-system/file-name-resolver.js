@@ -55,8 +55,7 @@ var minHeightQualifier = {
 };
 var paltformQualifier = {
     isMatch: function (value) {
-        return value === "android" ||
-            value === "ios";
+        return value === "android" || value === "ios";
     },
     getMatchValue: function (value, context) {
         return value === context.os.toLowerCase() ? 1 : -1;
@@ -64,8 +63,7 @@ var paltformQualifier = {
 };
 var orientationQualifier = {
     isMatch: function (value) {
-        return value === "land" ||
-            value === "port";
+        return value === "land" || value === "port";
     },
     getMatchValue: function (value, context) {
         var isLandscape = (context.width > context.height) ? 1 : -1;

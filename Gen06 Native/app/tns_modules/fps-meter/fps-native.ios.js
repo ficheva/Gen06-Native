@@ -31,7 +31,6 @@ var FPSCallback = (function () {
         this.displayLink = CADisplayLink.displayLinkWithTargetSelector(this.impl, "handleFrame");
         this.displayLink.paused = true;
         this.displayLink.addToRunLoopForMode(NSRunLoop.currentRunLoop(), NSDefaultRunLoopMode);
-        this.displayLink.addToRunLoopForMode(NSRunLoop.currentRunLoop(), UITrackingRunLoopMode);
     }
     FPSCallback.prototype.start = function () {
         if (this.running) {

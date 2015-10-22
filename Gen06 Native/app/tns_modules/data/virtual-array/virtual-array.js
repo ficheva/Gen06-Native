@@ -37,7 +37,8 @@ var VirtualArray = (function (_super) {
                 var count = value - this._length;
                 this._length = value;
                 this.notify({
-                    eventName: CHANGE, object: this,
+                    eventName: CHANGE,
+                    object: this,
                     action: count > 0 ? ADD : DELETE,
                     index: index,
                     removed: new Array(count < 0 ? Math.abs(count) : 0),
@@ -88,7 +89,8 @@ var VirtualArray = (function (_super) {
             }
         }
         this.notify({
-            eventName: CHANGE, object: this,
+            eventName: CHANGE,
+            object: this,
             action: UPDATE,
             index: index,
             removed: new Array(items.length),
@@ -118,7 +120,8 @@ var VirtualArray = (function (_super) {
             else {
                 if (count > 0) {
                     this.notify({
-                        eventName: VirtualArray.itemsLoadingEvent, object: this,
+                        eventName: VirtualArray.itemsLoadingEvent,
+                        object: this,
                         index: start,
                         count: count
                     });
@@ -129,7 +132,8 @@ var VirtualArray = (function (_super) {
         }
         if (start >= 0 && count > 0) {
             this.notify({
-                eventName: VirtualArray.itemsLoadingEvent, object: this,
+                eventName: VirtualArray.itemsLoadingEvent,
+                object: this,
                 index: start,
                 count: count
             });

@@ -1,0 +1,15 @@
+{
+  "dependsOn": [
+    "generator-NativeScript@0.0.6"
+  ],
+  "generator-NativeScript": {
+    "cleanup": [
+      "./app/providers/gen06Backend-data-provider.js",
+      "./app/components/home/",
+      "./app/components/formView/",
+      "./app/components/registerView/",
+      "./app/components/dataListView/",
+      "./app/components/signInView/"
+    ]
+  }
+}

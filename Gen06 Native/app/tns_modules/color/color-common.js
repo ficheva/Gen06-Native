@@ -108,9 +108,6 @@ var Color = (function () {
         return this.argb === value.argb;
     };
     Color.equals = function (value1, value2) {
-        if (!value1 && !value2) {
-            return true;
-        }
         if (!value1 || !value2) {
             return false;
         }
@@ -140,10 +137,7 @@ var Color = (function () {
     };
     Color.prototype._normalizeHex = function (hexStr) {
         if (hexStr.charAt(0) === AMP && hexStr.length === 4) {
-            hexStr = hexStr.charAt(0)
-                + hexStr.charAt(1) + hexStr.charAt(1)
-                + hexStr.charAt(2) + hexStr.charAt(2)
-                + hexStr.charAt(3) + hexStr.charAt(3);
+            hexStr = hexStr.charAt(0) + hexStr.charAt(1) + hexStr.charAt(1) + hexStr.charAt(2) + hexStr.charAt(2) + hexStr.charAt(3) + hexStr.charAt(3);
         }
         return hexStr;
     };

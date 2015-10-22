@@ -5,7 +5,6 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var observable = require("data/observable");
-var types = require("utils/types");
 var ChangeType = (function () {
     function ChangeType() {
     }
@@ -28,14 +27,16 @@ var ObservableArray = (function (_super) {
             this._array = Array.apply(null, arguments);
         }
         this._addArgs = {
-            eventName: CHANGE, object: this,
+            eventName: CHANGE,
+            object: this,
             action: ChangeType.Add,
             index: null,
             removed: new Array(),
             addedCount: 1
         };
         this._deleteArgs = {
-            eventName: CHANGE, object: this,
+            eventName: CHANGE,
+            object: this,
             action: ChangeType.Delete,
             index: null,
             removed: null,
@@ -48,7 +49,8 @@ var ObservableArray = (function (_super) {
     ObservableArray.prototype.setItem = function (index, value) {
         this._array[index] = value;
         this.notify({
-            eventName: CHANGE, object: this,
+            eventName: CHANGE,
+            object: this,
             action: ChangeType.Update,
             index: index,
             removed: new Array(1),
@@ -58,12 +60,6 @@ var ObservableArray = (function (_super) {
     Object.defineProperty(ObservableArray.prototype, "length", {
         get: function () {
             return this._array.length;
-        },
-        set: function (value) {
-            if (types.isNumber(value) && this._array && this._array.length !== value) {
-                this._array = this._array.slice(0, value);
-                this._notifyLengthChange();
-            }
         },
         enumerable: true,
         configurable: true
@@ -131,7 +127,8 @@ var ObservableArray = (function (_super) {
         var length = this._array.length;
         var result = this._array.splice.apply(this._array, arguments);
         this.notify({
-            eventName: CHANGE, object: this,
+            eventName: CHANGE,
+            object: this,
             action: ChangeType.Splice,
             index: start,
             removed: result,
